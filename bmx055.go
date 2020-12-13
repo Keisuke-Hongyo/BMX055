@@ -67,14 +67,14 @@ func (d *Device) Configture() {
 }
 
 //isConnected
-func (d *Device) isConnected() bool {
+func (d *Device) IsConnected() bool {
 	data := make([]byte, 1)
 	d.bus.ReadRegister(d.AccAddress, BGW_CHIPID, data)
 	return data[0] == 0xfa
 }
 
 /* Get Acceralater Data Function */
-func (d *Device) getAcc() error {
+func (d *Device) GetAcc() error {
 	data := make([]byte, 6)
 	err := d.bus.ReadRegister(d.AccAddress, AccDataStartReg, data)
 	if err != nil {
@@ -104,7 +104,7 @@ func (d *Device) getAcc() error {
 }
 
 /* Get Gyro Data Function */
-func (d *Device) getGyro() error {
+func (d *Device) GetGyro() error {
 	data := make([]byte, 6)
 	err := d.bus.ReadRegister(d.GyroAddress, GyroDataStartReg, data)
 	if err != nil {
@@ -135,7 +135,7 @@ func (d *Device) getGyro() error {
 }
 
 /* Get Magnetic Filed Data Function */
-func (d *Device) getMag() error {
+func (d *Device) GetMag() error {
 
 	data := make([]byte, 6)
 
