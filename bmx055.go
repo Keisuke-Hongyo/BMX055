@@ -7,19 +7,19 @@ import (
 
 type bmx055_data struct {
 	// Acc
-	xAcc float64
-	yAcc float64
-	zAcc float64
+	XAcc float64
+	YAcc float64
+	ZAcc float64
 
 	// Gyaro
-	xGyro float64
-	yGyro float64
-	zGyro float64
+	XGyro float64
+	YGyro float64
+	ZGyro float64
 
 	// Mag
-	xMag int32
-	yMag int32
-	zMag int32
+	XMag int32
+	YMag int32
+	ZMag int32
 }
 
 type Device struct {
@@ -27,7 +27,7 @@ type Device struct {
 	AccAddress  uint8
 	GyroAddress uint8
 	MagAddress  uint8
-	dt          bmx055_data
+	Dat         bmx055_data
 }
 
 func New(bus drivers.I2C) Device {
@@ -42,34 +42,34 @@ func New(bus drivers.I2C) Device {
 /* Init*/
 func (d *Device) Configture() {
 	/* Acc*/
-	d.bus.WriteRegister(d.AccAddress, AccPmuRangeReg, []byte{0x03})
-	d.bus.WriteRegister(d.AccAddress, AccPmuBwReg, []byte{0x08})
-	d.bus.WriteRegister(d.AccAddress, AccPmuLpwReg, []byte{0x00})
+	_ = d.bus.WriteRegister(d.AccAddress, AccPmuRangeReg, []byte{0x03})
+	_ = d.bus.WriteRegister(d.AccAddress, AccPmuBwReg, []byte{0x08})
+	_ = d.bus.WriteRegister(d.AccAddress, AccPmuLpwReg, []byte{0x00})
 	time.Sleep(100 * time.Millisecond)
 
 	/* Gyro*/
-	d.bus.WriteRegister(d.GyroAddress, GyroRangeReg, []byte{0x04})
-	d.bus.WriteRegister(d.GyroAddress, GyroBwReg, []byte{0x07})
-	d.bus.WriteRegister(d.GyroAddress, GyroLpm1Reg, []byte{0x00})
+	_ = d.bus.WriteRegister(d.GyroAddress, GyroRangeReg, []byte{0x04})
+	_ = d.bus.WriteRegister(d.GyroAddress, GyroBwReg, []byte{0x07})
+	_ = d.bus.WriteRegister(d.GyroAddress, GyroLpm1Reg, []byte{0x00})
 	time.Sleep(100 * time.Millisecond)
 
 	/* Mag */
-	d.bus.WriteRegister(d.MagAddress, MagPowCtlReg, []byte{0x83})
+	_ = d.bus.WriteRegister(d.MagAddress, MagPowCtlReg, []byte{0x83})
 	time.Sleep(100 * time.Millisecond)
-	d.bus.WriteRegister(d.MagAddress, MagPowCtlReg, []byte{0x01})
+	_ = d.bus.WriteRegister(d.MagAddress, MagPowCtlReg, []byte{0x01})
 	time.Sleep(100 * time.Millisecond)
 
-	d.bus.WriteRegister(d.MagAddress, MagAdvOpOutputReg, []byte{0x00})
-	d.bus.WriteRegister(d.MagAddress, MagAxesReg, []byte{0x84})
-	d.bus.WriteRegister(d.MagAddress, MagRepXyReg, []byte{0x04})
-	d.bus.WriteRegister(d.MagAddress, MagRepZReg, []byte{0x16})
+	_ = d.bus.WriteRegister(d.MagAddress, MagAdvOpOutputReg, []byte{0x00})
+	_ = d.bus.WriteRegister(d.MagAddress, MagAxesReg, []byte{0x84})
+	_ = d.bus.WriteRegister(d.MagAddress, MagRepXyReg, []byte{0x04})
+	_ = d.bus.WriteRegister(d.MagAddress, MagRepZReg, []byte{0x16})
 
 }
 
 //isConnected
 func (d *Device) IsConnected() bool {
 	data := make([]byte, 1)
-	d.bus.ReadRegister(d.AccAddress, BGW_CHIPID, data)
+	_ = d.bus.ReadRegister(d.AccAddress, BGW_CHIPID, data)
 	return data[0] == 0xfa
 }
 
@@ -96,9 +96,9 @@ func (d *Device) GetAcc() error {
 		z -= 4096
 	}
 
-	d.dt.xAcc = float64(x) * 0.0196
-	d.dt.yAcc = float64(y) * 0.0196
-	d.dt.zAcc = float64(z) * 0.0196
+	d.Dat.XAcc = float64(x) * 0.0196
+	d.Dat.YAcc = float64(y) * 0.0196
+	d.Dat.ZAcc = float64(z) * 0.0196
 
 	return nil
 }
@@ -127,9 +127,9 @@ func (d *Device) GetGyro() error {
 	}
 
 	//
-	d.dt.xGyro = float64(x) * 0.0038
-	d.dt.yGyro = float64(y) * 0.0038
-	d.dt.zGyro = float64(z) * 0.0038
+	d.Dat.XGyro = float64(x) * 0.0038
+	d.Dat.YGyro = float64(y) * 0.0038
+	d.Dat.ZGyro = float64(z) * 0.0038
 
 	return nil
 }
@@ -145,17 +145,17 @@ func (d *Device) GetMag() error {
 		return err
 	}
 	// Get ACC Data
-	d.dt.xMag = int32(uint16(data[1])<<8|uint16(data[0]&0xf8)) / 8
-	if d.dt.xMag > 4095 {
-		d.dt.xMag -= 8192
+	d.Dat.XMag = int32(uint16(data[1])<<8|uint16(data[0]&0xf8)) / 8
+	if d.Dat.XMag > 4095 {
+		d.Dat.XMag -= 8192
 	}
-	d.dt.yMag = int32(uint16(data[3])<<8|uint16(data[2]&0xf8)) / 8
-	if d.dt.yMag > 4095 {
-		d.dt.yMag -= 8192
+	d.Dat.YMag = int32(uint16(data[3])<<8|uint16(data[2]&0xf8)) / 8
+	if d.Dat.YMag > 4095 {
+		d.Dat.YMag -= 8192
 	}
-	d.dt.zMag = int32(uint16(data[5])<<8|uint16(data[4]&0xfe)) / 2
-	if d.dt.zMag > 16383 {
-		d.dt.zMag -= 32768
+	d.Dat.ZMag = int32(uint16(data[5])<<8|uint16(data[4]&0xfe)) / 2
+	if d.Dat.ZMag > 16383 {
+		d.Dat.ZMag -= 32768
 	}
 	return nil
 }
